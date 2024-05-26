@@ -23,8 +23,6 @@ async def lifespan(app: FastAPI):
         device = "cuda:0"
     if torch.backends.mps.is_available():
         device = "mps"
-    if torch.xpu.is_available():
-        device = "xpu"
     torch_dtype = torch.float16 if device != "cpu" else torch.float32
     model = ParlerTTSForConditionalGeneration.from_pretrained("parler-tts/parler_tts_mini_v0.1").to(device, dtype=torch_dtype)
     tokenizer = AutoTokenizer.from_pretrained("parler-tts/parler_tts_mini_v0.1")    
