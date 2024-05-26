@@ -13,11 +13,13 @@ import numpy as np
 torch_dtype = None
 model = None
 tokenizer = None
+device = None
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     global torch_dtype
     global model
     global tokenizer
+    global device
     device = "cpu"
     if torch.cuda.is_available():
         device = "cuda:0"
@@ -34,8 +36,8 @@ class TTSconfig(BaseModel):
     text:str
     prompt:str
     def tokenized(self):
-        input_ids = tokenizer(self.prompt, return_tensors="pt").input_ids.to(torch_dtype)
-        prompt_input_ids = tokenizer(self.text, return_tensors="pt").input_ids.to(torch_dtype)
+        input_ids = tokenizer(self.prompt, return_tensors="pt").input_ids.to(device)
+        prompt_input_ids = tokenizer(self.text, return_tensors="pt").input_ids.to(device)
         return {"input_ids":input_ids,"prompt_input_ids":prompt_input_ids}
 
 app = FastAPI(lifespan=lifespan)
@@ -44,7 +46,6 @@ app = FastAPI(lifespan=lifespan)
 def tts(respose:TTSconfig):
     t1 = time.time()
     output = respose.tokenized()
-    print(output)
     generation = model.generate(input_ids=output["input_ids"], prompt_input_ids=output["prompt_input_ids"]).to(torch.float32)
     audio_arr:np.ndarray = generation.cpu().numpy().squeeze()
     return {'audio': b64encode(audio_arr.tobytes()).decode(),'sr':model.config.sampling_rate,"time":time.time() - t1}
