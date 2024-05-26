@@ -44,6 +44,7 @@ app = FastAPI(lifespan=lifespan)
 def tts(respose:TTSconfig):
     t1 = time.time()
     output = respose.tokenized()
+    print(output)
     generation = model.generate(input_ids=output["input_ids"], prompt_input_ids=output["prompt_input_ids"]).to(torch.float32)
     audio_arr:np.ndarray = generation.cpu().numpy().squeeze()
     return {'audio': b64encode(audio_arr.tobytes()).decode(),'sr':model.config.sampling_rate,"time":time.time() - t1}
