@@ -1,0 +1,7 @@
+descript_audio_codec==1.0.0
+fastapi==0.111.0
+numpy==1.26.4
+pydantic==2.7.1
+torch==2.1.2
+transformers==4.40.0
+uvicorn==0.29.0
